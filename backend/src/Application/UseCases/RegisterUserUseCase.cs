@@ -1,5 +1,6 @@
 using Garimpo.Application.Dtos;
 using Garimpo.Application.Ports;
+using Garimpo.Application.Validation;
 using Garimpo.Domain.Entities;
 using Garimpo.Domain.Exceptions;
 
@@ -25,15 +26,17 @@ public sealed class RegisterUserUseCase
         RegisterRequestDto request,
         CancellationToken cancellationToken = default)
     {
-        string normalizedEmail = User.NormalizeEmail(request.Email);
+        string normalizedEmail = InputValidators.ValidateEmail(request.Email);
+        string password = InputValidators.ValidatePassword(request.Password);
+        string fullName = InputValidators.ValidateFullName(request.FullName);
 
         if (await _userRepository.ExistsByEmailAsync(normalizedEmail, cancellationToken))
         {
             throw new EmailAlreadyRegisteredException(normalizedEmail);
         }
 
-        string passwordHash = _passwordHasher.Hash(request.Password);
-        var user = User.Create(normalizedEmail, passwordHash, request.FullName);
+        string passwordHash = _passwordHasher.Hash(password);
+        var user = User.Create(normalizedEmail, passwordHash, fullName);
 
         await _userRepository.AddAsync(user, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

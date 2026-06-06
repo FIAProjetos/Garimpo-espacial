@@ -45,7 +45,25 @@ disciplina de Cybersecurity (3ES 2026).
 | Senhas em texto claro | Hash BCrypt | `BcryptPasswordHasher` (work factor padrao BCrypt) |
 | Vazamento de dados | DTOs sem TLE bruto nem PasswordHash | `DebrisDto`, `UserDto` expõem apenas metadados |
 | Headers inseguros | Security headers | `SecurityHeadersMiddleware` (CSP, X-Frame-Options, nosniff) |
+| SQL injection | ORM parametrizado + validacao de entrada | EF Core LINQ (sem SQL cru); `InputValidators` com whitelist de grupos Celestrak e limites numericos |
+| XSS (entrada armazenada) | Rejeicao de markup/script em campos de texto | `InputValidators.RejectDangerousContent` em email, nome e `group`; frontend renderiza apenas `<Text>` (sem HTML) |
+| Abuso de paginacao / parametros | Limites explicitos | `ValidatePagination` (page 1–10000, pageSize 1–200); DBSCAN epsilon 0.01–5, minPoints 2–100 |
 | Auditoria | Logs estruturados | `AuditLoggingMiddleware` para operacoes POST/PUT/DELETE |
+
+### 1.4 Validacao de entrada (`InputValidators`)
+
+Camada de aplicacao rejeita entradas invalidas **antes** de persistir ou chamar servicos externos:
+
+| Campo / parametro | Regras |
+| --- | --- |
+| `Email` | Obrigatorio, regex, max 256 chars, sem `<>` / `javascript:` / handlers HTML |
+| `Password` | 6–128 chars, sem caracteres de controle |
+| `FullName` | Obrigatorio, max 128 chars, sem padroes HTML/script |
+| `group` (ingestao) | Whitelist: `cosmos-2251-debris`, `iridium-33-debris`, `active` |
+| `epsilon` / `minPoints` | Intervalos finitos e limitados |
+| `page` / `pageSize` | Intervalos finitos; requisicao fora do limite retorna `400 Entrada invalida` |
+
+Falhas disparam `ValidationException` → `ProblemDetails` 400 via `ExceptionHandlingMiddleware`.
 
 ---
 

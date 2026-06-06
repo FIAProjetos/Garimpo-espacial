@@ -1,5 +1,6 @@
 using Garimpo.Application.Dtos;
 using Garimpo.Application.Ports;
+using Garimpo.Application.Validation;
 using Garimpo.Domain.Entities;
 using Garimpo.Domain.Exceptions;
 
@@ -25,10 +26,11 @@ public sealed class LoginUserUseCase
         LoginRequestDto request,
         CancellationToken cancellationToken = default)
     {
-        string normalizedEmail = User.NormalizeEmail(request.Email);
+        string normalizedEmail = InputValidators.ValidateEmail(request.Email);
+        string password = InputValidators.ValidatePassword(request.Password);
         var user = await _userRepository.FindByEmailAsync(normalizedEmail, cancellationToken);
 
-        if (user is null || !_passwordHasher.Verify(request.Password, user.PasswordHash))
+        if (user is null || !_passwordHasher.Verify(password, user.PasswordHash))
         {
             throw new InvalidCredentialsException();
         }

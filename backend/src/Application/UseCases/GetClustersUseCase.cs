@@ -1,5 +1,6 @@
 using Garimpo.Application.Dtos;
 using Garimpo.Application.Ports;
+using Garimpo.Application.Validation;
 
 namespace Garimpo.Application.UseCases;
 
@@ -30,8 +31,7 @@ public sealed class GetClustersUseCase
         int pageSize,
         CancellationToken cancellationToken = default)
     {
-        page = Math.Max(1, page);
-        pageSize = Math.Clamp(pageSize, 1, 200);
+        (page, pageSize) = InputValidators.ValidatePagination(page, pageSize);
 
         var totalCount = await _clusterRepository.CountAsync(cancellationToken);
         var clusters = await _clusterRepository.GetPagedAsync(page, pageSize, cancellationToken);

@@ -1,5 +1,6 @@
 using Garimpo.Application.Dtos;
 using Garimpo.Application.Ports;
+using Garimpo.Application.Validation;
 using Garimpo.Domain.Entities;
 
 namespace Garimpo.Application.UseCases;
@@ -31,7 +32,8 @@ public sealed class IngestTleUseCase
         string? group = null,
         CancellationToken cancellationToken = default)
     {
-        IReadOnlyList<Debris> fetched = await _tleProvider.FetchDebrisAsync(group, cancellationToken);
+        string? validatedGroup = InputValidators.ValidateCelestrakGroup(group);
+        IReadOnlyList<Debris> fetched = await _tleProvider.FetchDebrisAsync(validatedGroup, cancellationToken);
 
         IReadOnlySet<int> existingNoradIds = await _debrisRepository.GetExistingNoradIdsAsync(cancellationToken);
 

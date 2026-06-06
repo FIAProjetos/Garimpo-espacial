@@ -1,5 +1,6 @@
 using Garimpo.Application.Dtos;
 using Garimpo.Application.Ports;
+using Garimpo.Application.Validation;
 using Garimpo.Domain.Exceptions;
 
 namespace Garimpo.Application.UseCases;
@@ -31,8 +32,7 @@ public sealed class GetDebrisUseCase
         int pageSize,
         CancellationToken cancellationToken = default)
     {
-        page = Math.Max(1, page);
-        pageSize = Math.Clamp(pageSize, 1, 200);
+        (page, pageSize) = InputValidators.ValidatePagination(page, pageSize);
 
         var totalCount = await _debrisRepository.CountAsync(cancellationToken);
         var debris = await _debrisRepository.GetPagedAsync(page, pageSize, cancellationToken);

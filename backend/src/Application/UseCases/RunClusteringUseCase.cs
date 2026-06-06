@@ -1,5 +1,6 @@
 using Garimpo.Application.Dtos;
 using Garimpo.Application.Ports;
+using Garimpo.Application.Validation;
 using Garimpo.Domain.Entities;
 using Garimpo.Domain.Services;
 using Garimpo.Domain.ValueObjects;
@@ -36,6 +37,8 @@ public sealed class RunClusteringUseCase
         ClusteringRequestDto request,
         CancellationToken cancellationToken = default)
     {
+        InputValidators.ValidateClusteringParameters(request.Epsilon, request.MinPoints);
+
         // Entidades rastreadas para que a reatribuicao de aglomerado seja persistida.
         IReadOnlyList<Debris> allDebris = await _debrisRepository.GetAllTrackedAsync(cancellationToken);
 
