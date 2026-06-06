@@ -1,19 +1,21 @@
-version: '3.8'
+# Rode com: docker compose --env-file ../.env up --build
+# (o .env fica na raiz do mono-repo; ver ../.env.example)
 
 services:
   db:
     image: postgres:16-alpine
     container_name: garimpo-db-local
+    env_file: ../.env
     environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=garimpo_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - postgres_data_local:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d garimpo_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -23,14 +25,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file: ../.env
     ports:
       - "8080:8080"
     depends_on:
       db:
         condition: service_healthy
     environment:
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=garimpo_db;Username=user;Password=password
-      - ASPNETCORE_URLS=http://+:8080
+      ConnectionStrings__DefaultConnection: "Host=${DB_HOST};Port=${DB_PORT:-5432};Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      ASPNETCORE_URLS: ${ASPNETCORE_URLS:-http://+:8080}
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      Security__ApiKey: ${Security__ApiKey}
+      ExternalServices__Celestrak__BaseUrl: ${ExternalServices__Celestrak__BaseUrl}
+      ExternalServices__Celestrak__DefaultGroup: ${ExternalServices__Celestrak__DefaultGroup:-cosmos-2251-debris}
 
 volumes:
   postgres_data_local:

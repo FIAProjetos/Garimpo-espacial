@@ -1,6 +1,29 @@
-@Garimpo.Api_HostAddress = http://localhost:5187
+# Copie .env.example -> .env e use o mesmo valor de Security__ApiKey
+@Garimpo.Api_HostAddress = http://localhost:8080
+@ApiKey = sua-chave-do-arquivo-env
 
-GET {{Garimpo.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Swagger UI
+GET {{Garimpo.Api_HostAddress}}/swagger/index.html
 
-###
+### Ingerir catalogo TLE (requer API Key do .env)
+POST {{Garimpo.Api_HostAddress}}/api/ingestion?group=cosmos-2251-debris
+X-Api-Key: {{ApiKey}}
+
+### Executar clusterizacao DBSCAN (requer API Key)
+POST {{Garimpo.Api_HostAddress}}/api/clusters/run
+X-Api-Key: {{ApiKey}}
+Content-Type: application/json
+
+{
+  "epsilon": 0.3,
+  "minPoints": 5
+}
+
+### Listar aglomerados (leitura publica)
+GET {{Garimpo.Api_HostAddress}}/api/clusters
+
+### Listar detritos (leitura publica)
+GET {{Garimpo.Api_HostAddress}}/api/debris
+
+### Listar alertas de risco (leitura publica)
+GET {{Garimpo.Api_HostAddress}}/api/alerts

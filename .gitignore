@@ -29,3 +29,10 @@ ios/
 
 # Docker
 docker-compose.override.yml
+
+# Secrets — nunca versionar
+.env
+.env.local
+.env.*.local
+!.env.example
+!**/.env.example
