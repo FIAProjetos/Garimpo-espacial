@@ -5,6 +5,15 @@ disciplina de Cybersecurity (3ES 2026).
 
 ---
 
+## Integrantes
+
+| Nome | RM |
+| --- | --- |
+| Ricardo Fernandes de Aquino | 554597 |
+| Khadija do Rocio Vieira de Lima | 558971 |
+
+---
+
 ## 1. Analise de Riscos e Ameacas (Threat Modeling)
 
 ### 1.1 Ativos criticos

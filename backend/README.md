@@ -1,5 +1,7 @@
 # Garimpo Espacial - Backend
 
+Índice geral do mono-repo e links por disciplina: [README.md](../README.md).
+
 API REST de inteligencia de detritos espaciais. O backend ingere dados publicos de
 detritos orbitais no formato **TLE (Two-Line Element)** da **Celestrak/NORAD**, aplica o
 algoritmo de agrupamento espacial **DBSCAN** para identificar zonas de alta densidade de
@@ -28,8 +30,10 @@ Kessler** (colisoes em cadeia). Mapear onde o lixo se concentra permite:
 
 | Disciplina | Documento |
 | --- | --- |
+| Indice geral (mono-repo) | [README.md](../README.md) |
 | Arquitetura | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | Cybersecurity | [docs/CYBERSECURITY.md](docs/CYBERSECURITY.md) |
+| Mobile (Expo) | [frontend/README.md](../frontend/README.md) |
 | C# / OOP | Este README + codigo em `src/Domain` |
 
 ## Arquitetura (Hexagonal + Clean Architecture)
