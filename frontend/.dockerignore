@@ -1,0 +1,23 @@
+# Docker
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# React Native / Expo
+.expo
+/android
+/ios
+*.jks
+*.p12
+*.keystore
+*.mobileprovision

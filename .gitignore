@@ -1,0 +1,31 @@
+# General
+.DS_Store
+Thumbs.db
+
+# Node / React Native
+node_modules/
+npm-debug.log
+yarn-error.log
+.expo/
+dist/
+.idea/
+*.jks
+*.p12
+*.keystore
+*.mobileprovision
+android/
+ios/
+
+# .NET
+**/*.cs.user
+**/*.csproj.user
+**/.vs/
+**/[Bb]in/
+**/[Oo]bj/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Docker
+docker-compose.override.yml

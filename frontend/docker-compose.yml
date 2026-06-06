@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  frontend:
+    container_name: garimpo-frontend-local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081" # Metro Bundler port
+      - "19000:19000"
+      - "19001:19001"
+      - "19002:19002"
+    volumes:
+      # Mounts the host's source code into the container for hot-reloading
+      - .:/app
+      # Prevents the host's node_modules from overwriting the container's
+      - /app/node_modules
+    environment:
+      - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
+      - REACT_NATIVE_PACKAGER_HOSTNAME=host.docker.internal
