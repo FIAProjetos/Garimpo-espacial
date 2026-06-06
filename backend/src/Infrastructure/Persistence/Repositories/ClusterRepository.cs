@@ -26,6 +26,26 @@ public sealed class ClusterRepository : IClusterRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Cluster>> GetPagedAsync(
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        int skip = (page - 1) * pageSize;
+
+        return await _context.Clusters
+            .AsNoTracking()
+            .OrderByDescending(c => c.Density)
+            .Skip(skip)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> CountAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Clusters.CountAsync(cancellationToken);
+    }
+
     public async Task<Cluster?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.Clusters

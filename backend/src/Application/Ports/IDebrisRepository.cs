@@ -12,6 +12,8 @@ public interface IDebrisRepository
 
     Task<IReadOnlyList<Debris>> GetAllAsync(CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<Debris>> GetPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Retorna todos os detritos rastreados pelo contexto, para que reatribuicoes de
     /// aglomerado sejam persistidas corretamente durante a clusterizacao.

@@ -17,13 +17,16 @@ public sealed class DebrisController : ControllerBase
         _getDebris = getDebris;
     }
 
-    /// <summary>Lista todos os detritos ingeridos, ordenados por altitude.</summary>
+    /// <summary>Lista detritos ingeridos com paginacao, ordenados por altitude.</summary>
     [HttpGet]
-    [ProducesResponseType(typeof(IReadOnlyList<DebrisDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<IReadOnlyList<DebrisDto>>> List(CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(PagedResultDto<DebrisDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedResultDto<DebrisDto>>> List(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
     {
-        var debris = await _getDebris.ListAsync(cancellationToken);
-        return Ok(debris);
+        var result = await _getDebris.ListPagedAsync(page, pageSize, cancellationToken);
+        return Ok(result);
     }
 
     /// <summary>Obtem um detrito especifico pelo identificador.</summary>

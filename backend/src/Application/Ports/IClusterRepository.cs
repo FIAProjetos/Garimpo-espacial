@@ -11,6 +11,10 @@ public interface IClusterRepository
 
     Task<IReadOnlyList<Cluster>> GetAllAsync(CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<Cluster>> GetPagedAsync(int page, int pageSize, CancellationToken cancellationToken = default);
+
+    Task<int> CountAsync(CancellationToken cancellationToken = default);
+
     Task<Cluster?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>Remove todos os aglomerados existentes (antes de uma nova execucao de clustering).</summary>

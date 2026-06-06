@@ -16,15 +16,17 @@ Secrets ficam fora do Git (Cybersecurity + Arquitetura):
 
 ```bash
 cp .env.example .env
-# Edite .env: POSTGRES_PASSWORD, Security__ApiKey, EXPO_PUBLIC_API_KEY
+# Edite .env: POSTGRES_PASSWORD, Security__Jwt__Secret
 ```
 
 | Variavel | Precisa de secret? |
 | --- | --- |
-| `Security__ApiKey` | Sim — protege a nossa API |
+| `Security__Jwt__Secret` | Sim — assina tokens JWT (min. 32 chars) |
 | `POSTGRES_PASSWORD` | Sim |
 | `ExternalServices__Celestrak__*` | **Nao** — Celestrak e catalogo publico |
 | `ExternalServices__SpaceTrack__*` | Sim (opcional) — NORAD oficial |
+
+Usuario de teste (seed automatico): `fiap@teste.com` / `123456`
 
 ## Como Rodar
 
@@ -33,4 +35,13 @@ cp .env.example .env          # primeira vez
 docker compose up --build     # raiz: front + back + db
 ```
 
-Consulte [`backend/README.md`](backend/README.md) e [`backend/docs/CYBERSECURITY.md`](backend/docs/CYBERSECURITY.md) para detalhes.
+Consulte [`backend/README.md`](backend/README.md), [`frontend/README.md`](frontend/README.md) e [`backend/docs/CYBERSECURITY.md`](backend/docs/CYBERSECURITY.md) para detalhes.
+
+## App Mobile
+
+```bash
+cd frontend && npm install && npx expo start --web   # navegador
+# ou: npx expo start  →  w (web) / QR code (mobile)
+```
+
+Login de teste: `fiap@teste.com` / `123456`

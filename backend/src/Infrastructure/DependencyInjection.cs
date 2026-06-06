@@ -3,6 +3,8 @@ using Garimpo.Infrastructure.Adapters;
 using Garimpo.Infrastructure.ExternalServices;
 using Garimpo.Infrastructure.Persistence;
 using Garimpo.Infrastructure.Persistence.Repositories;
+using Garimpo.Infrastructure.Persistence.Seeding;
+using Garimpo.Infrastructure.Security;
 using Garimpo.Infrastructure.Tle;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -36,10 +38,14 @@ public static class DependencyInjection
         services.AddScoped<IDebrisRepository, DebrisRepository>();
         services.AddScoped<IClusterRepository, ClusterRepository>();
         services.AddScoped<IAlertRepository, AlertRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddSingleton<IClusteringService, DbscanClusteringAdapter>();
         services.AddSingleton<IAlertEvaluationService, AlertEvaluationAdapter>();
+        services.AddSingleton<IPasswordHasher, BcryptPasswordHasher>();
+        services.AddSingleton<ITokenService, JwtTokenService>();
+        services.AddScoped<DatabaseSeeder>();
 
         services.AddSingleton<TleParser>();
         services.AddHttpClient<ITleProvider, CelestrakTleProvider>(client =>

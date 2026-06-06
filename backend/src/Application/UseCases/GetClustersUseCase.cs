@@ -24,4 +24,19 @@ public sealed class GetClustersUseCase
             .Select(ClusterDto.FromEntity)
             .ToList();
     }
+
+    public async Task<PagedResultDto<ClusterDto>> ListPagedAsync(
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 200);
+
+        var totalCount = await _clusterRepository.CountAsync(cancellationToken);
+        var clusters = await _clusterRepository.GetPagedAsync(page, pageSize, cancellationToken);
+        var items = clusters.Select(ClusterDto.FromEntity).ToList();
+
+        return PagedResultDto<ClusterDto>.Create(items, page, pageSize, totalCount);
+    }
 }

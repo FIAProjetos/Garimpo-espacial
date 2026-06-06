@@ -1,20 +1,14 @@
-# Use an official Node.js runtime as a parent image
-FROM node:18-alpine
+FROM node:20-alpine
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Copy package.json and yarn.lock (or package-lock.json)
-COPY package.json ./
+COPY package.json package-lock.json ./
 
-# Install dependencies
-RUN npm install
+RUN npm ci
 
-# Copy the rest of the application source code
 COPY . .
 
-# Expose the port the app runs on
 EXPOSE 8081 19000 19001 19002
 
-# Command to run the application
-CMD ["npm", "start"]
+ENTRYPOINT ["sh", "docker-entrypoint.sh"]
+CMD ["npx", "expo", "start", "--web", "--host", "lan"]

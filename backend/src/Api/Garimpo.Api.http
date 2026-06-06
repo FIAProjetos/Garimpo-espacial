@@ -1,17 +1,35 @@
-# Copie .env.example -> .env e use o mesmo valor de Security__ApiKey
 @Garimpo.Api_HostAddress = http://localhost:8080
-@ApiKey = sua-chave-do-arquivo-env
 
-### Swagger UI
-GET {{Garimpo.Api_HostAddress}}/swagger/index.html
+### Login (usuario seed: fiap@teste.com / 123456)
+# @name login
+POST {{Garimpo.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
 
-### Ingerir catalogo TLE (requer API Key do .env)
+{
+  "email": "fiap@teste.com",
+  "password": "123456"
+}
+
+###
+@token = {{login.response.body.token}}
+
+### Registrar novo usuario
+POST {{Garimpo.Api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "novo@exemplo.com",
+  "password": "senha123",
+  "fullName": "Novo Analista"
+}
+
+### Ingerir catalogo TLE (requer Bearer)
 POST {{Garimpo.Api_HostAddress}}/api/ingestion?group=cosmos-2251-debris
-X-Api-Key: {{ApiKey}}
+Authorization: Bearer {{token}}
 
-### Executar clusterizacao DBSCAN (requer API Key)
+### Executar clusterizacao DBSCAN (requer Bearer)
 POST {{Garimpo.Api_HostAddress}}/api/clusters/run
-X-Api-Key: {{ApiKey}}
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -19,11 +37,14 @@ Content-Type: application/json
   "minPoints": 5
 }
 
-### Listar aglomerados (leitura publica)
-GET {{Garimpo.Api_HostAddress}}/api/clusters
+### Listar aglomerados paginados (requer Bearer)
+GET {{Garimpo.Api_HostAddress}}/api/clusters?page=1&pageSize=20
+Authorization: Bearer {{token}}
 
-### Listar detritos (leitura publica)
-GET {{Garimpo.Api_HostAddress}}/api/debris
+### Listar detritos paginados (requer Bearer)
+GET {{Garimpo.Api_HostAddress}}/api/debris?page=1&pageSize=20
+Authorization: Bearer {{token}}
 
-### Listar alertas de risco (leitura publica)
+### Listar alertas (requer Bearer)
 GET {{Garimpo.Api_HostAddress}}/api/alerts
+Authorization: Bearer {{token}}

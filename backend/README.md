@@ -22,7 +22,7 @@ Kessler** (colisoes em cadeia). Mapear onde o lixo se concentra permite:
 - PostgreSQL 16 - persistencia
 - Swashbuckle (Swagger / OpenAPI) - documentacao
 - Docker / Docker Compose - orquestracao (raiz + por aplicacao)
-- Seguranca: API Key, rate limiting, security headers, auditoria
+- Seguranca: JWT Bearer, BCrypt, rate limiting, security headers, auditoria
 
 ## Documentacao por disciplina
 
@@ -92,18 +92,30 @@ flowchart TD
     K --> L[Dashboard / cliente]
 ```
 
+## Autenticacao (JWT)
+
+Todos os endpoints exigem **Bearer JWT**, exceto `/api/auth/register` e `/api/auth/login`.
+
+Usuario de teste criado automaticamente no seed (sprint Mobile):
+
+| Email | Senha |
+| --- | --- |
+| `fiap@teste.com` | `123456` |
+
 ## Endpoints
 
-| Metodo | Rota | Descricao |
+| Metodo | Rota | Auth |
 | --- | --- | --- |
-| `POST` | `/api/ingestion?group={grupo}` | Ingestao TLE (**requer `X-Api-Key`**) |
-| `POST` | `/api/clusters/run` | DBSCAN (**requer `X-Api-Key`**) |
-| `GET` | `/api/clusters` | Lista aglomerados (publico) |
-| `GET` | `/api/debris` | Lista detritos (publico) |
-| `GET` | `/api/debris/{id}` | Detalha um detrito (publico) |
-| `GET` | `/api/alerts` | Alertas de risco orbital (publico) |
-| `POST` | `/api/alerts/evaluate` | Reavalia alertas (**requer `X-Api-Key`**) |
-| `POST` | `/api/alerts/{id}/acknowledge` | Reconhece alerta (**requer `X-Api-Key`**) |
+| `POST` | `/api/auth/register` | Publico |
+| `POST` | `/api/auth/login` | Publico |
+| `POST` | `/api/ingestion?group={grupo}` | Bearer |
+| `POST` | `/api/clusters/run` | Bearer |
+| `GET` | `/api/clusters` | Bearer |
+| `GET` | `/api/debris` | Bearer |
+| `GET` | `/api/debris/{id}` | Bearer |
+| `GET` | `/api/alerts` | Bearer |
+| `POST` | `/api/alerts/evaluate` | Bearer |
+| `POST` | `/api/alerts/{id}/acknowledge` | Bearer |
 
 Grupos uteis da Celestrak: `cosmos-2251-debris`, `iridium-33-debris`, `active`.
 
@@ -114,17 +126,17 @@ Grupos uteis da Celestrak: `cosmos-2251-debris`, `iridium-33-debris`, `active`.
 ```bash
 # Na raiz do mono-repo
 cp .env.example .env
-# Edite .env: troque POSTGRES_PASSWORD e Security__ApiKey
+# Edite .env: troque POSTGRES_PASSWORD e Security__Jwt__Secret
 ```
 
 | Variavel | Obrigatoria | Descricao |
 | --- | --- | --- |
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` | Sim | Credenciais do banco |
-| `Security__ApiKey` | Sim | Chave da **nossa** API (header `X-Api-Key`) |
+| `Security__Jwt__Secret` | Sim | Secret JWT (min. 32 caracteres) |
 | `ConnectionStrings__DefaultConnection` | Sim (local) | Para `dotnet run` sem Docker |
 | `ExternalServices__Celestrak__BaseUrl` | Nao | Celestrak e **publica**, sem API key |
 | `ExternalServices__SpaceTrack__*` | Nao | NORAD oficial (opcional, requer cadastro) |
-| `EXPO_PUBLIC_API_URL` / `EXPO_PUBLIC_API_KEY` | Frontend | URL e chave para o app mobile |
+| `EXPO_PUBLIC_API_URL` | Frontend | URL da API (token JWT vai no AsyncStorage) |
 
 O arquivo `.env` esta no `.gitignore`. Apenas `.env.example` e versionado.
 
@@ -172,20 +184,23 @@ A migration inicial (`InitialCreate`) ja esta versionada em
 ## Fluxo de uso (passo a passo)
 
 ```bash
-export API_KEY=garimpo-dev-key-change-in-production
+# 1. Login (usuario seed)
+TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"fiap@teste.com","password":"123456"}' | jq -r .token)
 
-# 1. Ingerir detritos (operacao protegida)
+# 2. Ingerir detritos
 curl -X POST "http://localhost:8080/api/ingestion?group=cosmos-2251-debris" \
-  -H "X-Api-Key: $API_KEY"
+  -H "Authorization: Bearer $TOKEN"
 
-# 2. Rodar DBSCAN + gerar alertas
+# 3. Rodar DBSCAN + gerar alertas
 curl -X POST http://localhost:8080/api/clusters/run \
-  -H "X-Api-Key: $API_KEY" -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
   -d '{"epsilon":0.3,"minPoints":5}'
 
-# 3. Consultar aglomerados e alertas (leitura publica)
-curl http://localhost:8080/api/clusters
-curl http://localhost:8080/api/alerts
+# 4. Consultar aglomerados e alertas
+curl http://localhost:8080/api/clusters -H "Authorization: Bearer $TOKEN"
+curl http://localhost:8080/api/alerts -H "Authorization: Bearer $TOKEN"
 ```
 
 ## Evidencias de execucao
@@ -215,10 +230,11 @@ GET /api/clusters -> 8 aglomerados (maior densidade: ~4.3 em LEO ~760 km)
 GET /api/debris    -> 588 detritos catalogados
 GET /api/alerts    -> 6 alertas (2 Critical, demais Warning)
 
-# Seguranca
-POST /api/ingestion (sem API Key) -> 401 Unauthorized
-POST /api/ingestion (com X-Api-Key) -> 200 OK
-Headers: X-Content-Type-Options, X-Frame-Options, Content-Security-Policy
+# Autenticacao JWT
+POST /api/auth/login (fiap@teste.com / 123456) -> token JWT
+GET /api/clusters (sem token) -> 401 Unauthorized
+GET /api/clusters (com Bearer) -> 200 OK
+Seed: usuario fiap@teste.com criado no startup
 ```
 
 ## Estrutura de pastas

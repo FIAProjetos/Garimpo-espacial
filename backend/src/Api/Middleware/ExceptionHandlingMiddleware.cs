@@ -37,6 +37,8 @@ public sealed class ExceptionHandlingMiddleware
         {
             DebrisNotFoundException => (StatusCodes.Status404NotFound, "Recurso nao encontrado"),
             AlertNotFoundException => (StatusCodes.Status404NotFound, "Alerta nao encontrado"),
+            InvalidCredentialsException => (StatusCodes.Status401Unauthorized, "Credenciais invalidas"),
+            EmailAlreadyRegisteredException => (StatusCodes.Status409Conflict, "Email ja cadastrado"),
             TleParsingException => (StatusCodes.Status422UnprocessableEntity, "Dados TLE invalidos"),
             DomainException => (StatusCodes.Status400BadRequest, "Violacao de regra de negocio"),
             HttpRequestException => (StatusCodes.Status502BadGateway, "Falha ao consultar a fonte externa de TLE"),

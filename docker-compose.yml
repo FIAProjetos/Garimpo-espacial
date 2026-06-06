@@ -32,7 +32,10 @@ services:
       ConnectionStrings__DefaultConnection: "Host=${DB_HOST};Port=${DB_PORT:-5432};Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
       ASPNETCORE_URLS: ${ASPNETCORE_URLS:-http://+:8080}
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
-      Security__ApiKey: ${Security__ApiKey}
+      Security__Jwt__Secret: ${Security__Jwt__Secret}
+      Security__Jwt__Issuer: ${Security__Jwt__Issuer:-GarimpoEspacial}
+      Security__Jwt__Audience: ${Security__Jwt__Audience:-GarimpoEspacialApp}
+      Security__Jwt__ExpirationHours: ${Security__Jwt__ExpirationHours:-24}
       Security__AllowedOrigins__0: http://localhost:8081
       Security__AllowedOrigins__1: http://localhost:19000
       Security__AllowedOrigins__2: http://localhost:19001
@@ -60,7 +63,6 @@ services:
       EXPO_DEVTOOLS_LISTEN_ADDRESS: 0.0.0.0
       REACT_NATIVE_PACKAGER_HOSTNAME: host.docker.internal
       EXPO_PUBLIC_API_URL: ${EXPO_PUBLIC_API_URL:-http://localhost:8080}
-      EXPO_PUBLIC_API_KEY: ${EXPO_PUBLIC_API_KEY}
 
 volumes:
   postgres_data:

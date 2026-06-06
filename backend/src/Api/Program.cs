@@ -1,15 +1,17 @@
 using System.Reflection;
+using System.Text;
 using Garimpo.Api.Middleware;
-using Garimpo.Api.Security;
 using Garimpo.Application;
 using Garimpo.Infrastructure;
 using Garimpo.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Authentication;
+using Garimpo.Infrastructure.Persistence.Seeding;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
-// Carrega .env do mono-repo (sobrescreve appsettings.json — secrets fora do Git)
 DotNetEnv.Env.TraversePath().Load();
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,11 +23,32 @@ const string CorsPolicy = "GarimpoCors";
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddAuthentication(ApiKeyAuthenticationHandler.SchemeName)
-    .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(
-        ApiKeyAuthenticationHandler.SchemeName, null);
+string jwtSecret = builder.Configuration["Security:Jwt:Secret"]!;
+string jwtIssuer = builder.Configuration["Security:Jwt:Issuer"] ?? "GarimpoEspacial";
+string jwtAudience = builder.Configuration["Security:Jwt:Audience"] ?? "GarimpoEspacialApp";
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+            ClockSkew = TimeSpan.FromMinutes(1)
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
 builder.Services.AddRateLimiter(options =>
 {
@@ -50,16 +73,18 @@ builder.Services.AddSwaggerGen(options =>
     {
         Title = "Garimpo Espacial API",
         Version = "v1",
-        Description = "Plataforma de inteligencia de detritos espaciais com controles de seguranca "
-                    + "(API Key, rate limiting, auditoria) para operacoes criticas de missao orbital."
+        Description = "Plataforma de inteligencia de detritos espaciais. "
+                    + "Autentique via POST /api/auth/login e use o JWT como Bearer token."
     });
 
-    options.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "API Key de operador. Header: X-Api-Key",
-        Name = ApiKeyAuthenticationHandler.HeaderName,
+        Description = "JWT Bearer. Obtenha em POST /api/auth/login",
+        Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -67,7 +92,7 @@ builder.Services.AddSwaggerGen(options =>
         {
             new OpenApiSecurityScheme
             {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "ApiKey" }
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
             },
             Array.Empty<string>()
         }
@@ -101,6 +126,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 var app = builder.Build();
 
 await ApplyMigrationsAsync(app);
+await SeedDatabaseAsync(app);
 
 app.UseSecurityHeaders();
 app.UseExceptionHandlingMiddleware();
@@ -152,6 +178,13 @@ static async Task ApplyMigrationsAsync(WebApplication app)
     }
 }
 
+static async Task SeedDatabaseAsync(WebApplication app)
+{
+    using var scope = app.Services.CreateScope();
+    var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+    await seeder.SeedAsync();
+}
+
 static void ValidateRequiredConfiguration(IConfiguration configuration, IHostEnvironment environment)
 {
     var missing = new List<string>();
@@ -161,9 +194,14 @@ static void ValidateRequiredConfiguration(IConfiguration configuration, IHostEnv
         missing.Add("ConnectionStrings:DefaultConnection");
     }
 
-    if (string.IsNullOrWhiteSpace(configuration["Security:ApiKey"]))
+    string? jwtSecret = configuration["Security:Jwt:Secret"];
+    if (string.IsNullOrWhiteSpace(jwtSecret))
     {
-        missing.Add("Security:ApiKey");
+        missing.Add("Security:Jwt:Secret");
+    }
+    else if (jwtSecret.Length < 32)
+    {
+        missing.Add("Security:Jwt:Secret (minimo 32 caracteres)");
     }
 
     if (missing.Count == 0)

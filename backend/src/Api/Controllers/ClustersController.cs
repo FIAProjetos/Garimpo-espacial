@@ -21,13 +21,16 @@ public sealed class ClustersController : ControllerBase
         _runClustering = runClustering;
     }
 
-    /// <summary>Lista os aglomerados gerados, ordenados por densidade (maior risco primeiro).</summary>
+    /// <summary>Lista aglomerados com paginacao, ordenados por densidade (maior risco primeiro).</summary>
     [HttpGet]
-    [ProducesResponseType(typeof(IReadOnlyList<ClusterDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<IReadOnlyList<ClusterDto>>> List(CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(PagedResultDto<ClusterDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedResultDto<ClusterDto>>> List(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
     {
-        var clusters = await _getClusters.ExecuteAsync(cancellationToken);
-        return Ok(clusters);
+        var result = await _getClusters.ListPagedAsync(page, pageSize, cancellationToken);
+        return Ok(result);
     }
 
     /// <summary>

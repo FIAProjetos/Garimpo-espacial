@@ -26,6 +26,21 @@ public sealed class DebrisRepository : IDebrisRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<Debris>> GetPagedAsync(
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        int skip = (page - 1) * pageSize;
+
+        return await _context.Debris
+            .AsNoTracking()
+            .OrderBy(d => d.AltitudeKm)
+            .Skip(skip)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<Debris>> GetAllTrackedAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Debris.ToListAsync(cancellationToken);

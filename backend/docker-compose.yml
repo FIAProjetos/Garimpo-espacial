@@ -35,7 +35,10 @@ services:
       ConnectionStrings__DefaultConnection: "Host=${DB_HOST};Port=${DB_PORT:-5432};Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
       ASPNETCORE_URLS: ${ASPNETCORE_URLS:-http://+:8080}
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
-      Security__ApiKey: ${Security__ApiKey}
+      Security__Jwt__Secret: ${Security__Jwt__Secret}
+      Security__Jwt__Issuer: ${Security__Jwt__Issuer:-GarimpoEspacial}
+      Security__Jwt__Audience: ${Security__Jwt__Audience:-GarimpoEspacialApp}
+      Security__Jwt__ExpirationHours: ${Security__Jwt__ExpirationHours:-24}
       ExternalServices__Celestrak__BaseUrl: ${ExternalServices__Celestrak__BaseUrl}
       ExternalServices__Celestrak__DefaultGroup: ${ExternalServices__Celestrak__DefaultGroup:-cosmos-2251-debris}
 

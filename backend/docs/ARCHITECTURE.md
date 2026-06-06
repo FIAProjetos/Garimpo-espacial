@@ -101,7 +101,10 @@ sequenceDiagram
     participant Celestrak
     participant DB
 
-    Client->>API: POST /api/ingestion (X-Api-Key)
+    Client->>API: POST /api/auth/login
+    API-->>Client: JWT Bearer token
+
+    Client->>API: POST /api/ingestion (Authorization Bearer)
     API->>UseCase: IngestTleUseCase
     UseCase->>Celestrak: Fetch TLE
     Celestrak-->>UseCase: Raw telemetry
@@ -110,7 +113,7 @@ sequenceDiagram
     UseCase->>Domain: Evaluate telemetry alerts
     UseCase-->>Client: IngestionResult
 
-    Client->>API: POST /api/clusters/run (X-Api-Key)
+    Client->>API: POST /api/clusters/run (Authorization Bearer)
     API->>UseCase: RunClusteringUseCase
     UseCase->>Domain: DBSCAN
     UseCase->>DB: Persist clusters
@@ -130,10 +133,12 @@ sequenceDiagram
 
 | Metodo | Rota | Auth | Descricao |
 | --- | --- | --- | --- |
-| POST | `/api/ingestion` | API Key | Ingestao TLE |
-| POST | `/api/clusters/run` | API Key | DBSCAN |
-| GET | `/api/clusters` | Publico | Listar aglomerados |
-| GET | `/api/debris` | Publico | Listar detritos |
-| GET | `/api/alerts` | Publico | Listar alertas |
-| POST | `/api/alerts/evaluate` | API Key | Reavaliar alertas |
-| POST | `/api/alerts/{id}/acknowledge` | API Key | Reconhecer alerta |
+| POST | `/api/auth/register` | Publico | Registrar usuario |
+| POST | `/api/auth/login` | Publico | Login e emissao JWT |
+| POST | `/api/ingestion` | Bearer | Ingestao TLE |
+| POST | `/api/clusters/run` | Bearer | DBSCAN |
+| GET | `/api/clusters` | Bearer | Listar aglomerados |
+| GET | `/api/debris` | Bearer | Listar detritos |
+| GET | `/api/alerts` | Bearer | Listar alertas |
+| POST | `/api/alerts/evaluate` | Bearer | Reavaliar alertas |
+| POST | `/api/alerts/{id}/acknowledge` | Bearer | Reconhecer alerta |

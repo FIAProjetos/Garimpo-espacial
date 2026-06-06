@@ -1,4 +1,28 @@
 {
-  "name": "GarimpoFrontend",
-  "displayName": "GarimpoFrontend"
+  "expo": {
+    "name": "Garimpo Espacial",
+    "slug": "garimpo-espacial",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0B0F1A"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0B0F1A"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "backgroundColor": "#0B0F1A"
+    },
+    "plugins": [
+      "expo-asset",
+      "expo-font"
+    ]
+  }
 }

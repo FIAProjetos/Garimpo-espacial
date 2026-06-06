@@ -17,6 +17,8 @@ public static class DependencyInjection
         services.AddScoped<GetAlertsUseCase>();
         services.AddScoped<EvaluateAlertsUseCase>();
         services.AddScoped<AcknowledgeAlertUseCase>();
+        services.AddScoped<RegisterUserUseCase>();
+        services.AddScoped<LoginUserUseCase>();
 
         return services;
     }
