@@ -4,6 +4,15 @@ Plataforma de inteligência de dados para mapeamento de detritos orbitais na **�
 
 Mono-repo FIAP (Global Solution · Exploração Espacial): backend **ASP.NET Core 9** (hexagonal) + app **Expo / React Native** (web e mobile) + **PostgreSQL 16**, orquestrados por Docker Compose.
 
+## Documentação por disciplina
+
+| Disciplina | Documento |
+| --- | --- |
+| **GS Arquitetura de Software** | [backend/docs/ARCHITECTURE.md](backend/docs/ARCHITECTURE.md) |
+| **GS Cybersecurity** | [backend/docs/CYBERSECURITY.md](backend/docs/CYBERSECURITY.md) |
+| **GS C# / API Backend** | [backend/README.md](backend/README.md) |
+| **GS Mobile (React Native / Expo)** | [frontend/README.md](frontend/README.md) |
+
 ## Integrantes
 
 | Nome | RM |
@@ -16,8 +25,8 @@ Mono-repo FIAP (Global Solution · Exploração Espacial): backend **ASP.NET Cor
 1. Clone o repositório e configure o ambiente:
 
 ```bash
-cp .env.example .env
-# Edite .env: POSTGRES_PASSWORD e Security__Jwt__Secret (mín. 32 caracteres)
+sh scripts/setup-env.sh
+# Edite .env: POSTGRES_PASSWORD, Security__Jwt__Secret (mín. 32 chars) e ConnectionStrings
 docker compose up --build
 ```
 
@@ -38,21 +47,14 @@ docker compose up --build
 4. Conferir gráficos, listas paginadas, aba **Alertas** e **Perfil**
 5. Usar **← Site** na navbar do analista para voltar à landing **sem deslogar**
 
-## Documentação por disciplina
-
-| Disciplina | Documento |
-| --- | --- |
-| **GS Arquitetura de Software** | [backend/docs/ARCHITECTURE.md](backend/docs/ARCHITECTURE.md) |
-| **GS Cybersecurity** | [backend/docs/CYBERSECURITY.md](backend/docs/CYBERSECURITY.md) |
-| **GS C# / API Backend** | [backend/README.md](backend/README.md) |
-| **GS Mobile (React Native / Expo)** | [frontend/README.md](frontend/README.md) |
-
 ## Estrutura do repositório
 
 ```
 /
 ├── backend/          # API REST ASP.NET Core (hexagonal)
 ├── frontend/         # App Expo (web + mobile)
+├── scripts/
+│   └── setup-env.sh  # cria .env a partir de .env.example
 ├── docker-compose.yml
 ├── .env.example
 └── README.md         # este arquivo
@@ -68,10 +70,10 @@ Cada aplicação também possui `Dockerfile` e `docker-compose.yml` próprios pa
 
 ## Configuração (.env)
 
-Secrets ficam fora do Git. Copie o exemplo e ajuste antes de subir os containers:
+Secrets ficam fora do Git. Use o script na raiz do repositório e edite os valores obrigatórios:
 
 ```bash
-cp .env.example .env
+sh scripts/setup-env.sh
 ```
 
 | Variável | Obrigatório | Descrição |

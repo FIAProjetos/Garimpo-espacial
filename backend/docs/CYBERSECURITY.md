@@ -133,7 +133,7 @@ O Garimpo Espacial armazena **email e nome** de usuarios registrados (autenticac
 Secrets **nunca** ficam em `appsettings.json` versionado. Fluxo obrigatorio:
 
 ```bash
-cp .env.example .env   # na raiz do mono-repo
+sh scripts/setup-env.sh   # na raiz do mono-repo
 # Editar .env com senhas e secret JWT forte (min. 32 caracteres)
 ```
 

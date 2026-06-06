@@ -41,7 +41,7 @@ Em dispositivo físico, use o IP da sua máquina (ex.: `http://192.168.1.10:8080
 
 ```bash
 # Na raiz do mono-repo
-cp .env.example .env
+sh scripts/setup-env.sh   # criar .env e editar secrets
 docker compose up --build
 ```
 

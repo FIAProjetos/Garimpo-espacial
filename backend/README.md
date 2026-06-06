@@ -1,4 +1,4 @@
-# Garimpo Espacial - Backend
+# Garimpo Espacial - Backend (GS C#)
 
 Índice geral do mono-repo e links por disciplina: [README.md](../README.md).
 
@@ -129,8 +129,8 @@ Grupos uteis da Celestrak: `cosmos-2251-debris`, `iridium-33-debris`, `active`.
 
 ```bash
 # Na raiz do mono-repo
-cp .env.example .env
-# Edite .env: troque POSTGRES_PASSWORD e Security__Jwt__Secret
+sh scripts/setup-env.sh
+# Edite .env: POSTGRES_PASSWORD, Security__Jwt__Secret e ConnectionStrings
 ```
 
 | Variavel | Obrigatoria | Descricao |
@@ -150,7 +150,7 @@ O arquivo `.env` esta no `.gitignore`. Apenas `.env.example` e versionado.
 
 ```bash
 # Raiz do mono-repo (front + back + db)
-cp .env.example .env   # se ainda nao fez
+sh scripts/setup-env.sh   # se ainda nao tiver .env — depois edite os secrets
 docker compose up --build
 
 # Ou apenas backend + db (passa o .env da raiz)
@@ -209,21 +209,38 @@ curl http://localhost:8080/api/alerts -H "Authorization: Bearer $TOKEN"
 
 ## Evidencias de execucao
 
-Validado em `2026-06-06` com `docker compose up --build`:
+Ambiente validado em `2026-06-06` com `docker compose up --build` na raiz do mono-repo.
+
+### Como reproduzir
+
+```bash
+sh scripts/setup-env.sh   # criar .env e editar secrets
+docker compose up --build
+```
+
+- API: `http://localhost:8080`
+- Swagger: `http://localhost:8080/swagger`
+- App (frontend): `http://localhost:8081`
+
+### Build e startup
 
 ```
-# Build
 dotnet build Garimpo.Backend.sln  -> Build succeeded. 0 Error(s)
 
-# Startup (logs do container)
 Applying migration '20260606011510_InitialCreate'.
 Migrations aplicadas com sucesso.
 Now listening on: http://[::]:8080
+```
 
-# Swagger
+### Swagger
+
+```
 GET /swagger/index.html -> 200
+```
 
-# Fluxo completo
+### Fluxo completo (API)
+
+```
 POST /api/ingestion?group=cosmos-2251-debris
 -> {"fetched":588,"imported":588,"skipped":0}
 
@@ -233,13 +250,20 @@ POST /api/clusters/run {"epsilon":0.3,"minPoints":5}
 GET /api/clusters -> 8 aglomerados (maior densidade: ~4.3 em LEO ~760 km)
 GET /api/debris    -> 588 detritos catalogados
 GET /api/alerts    -> 6 alertas (2 Critical, demais Warning)
+```
 
-# Autenticacao JWT
+### Autenticacao JWT
+
+```
 POST /api/auth/login (fiap@teste.com / 123456) -> token JWT
 GET /api/clusters (sem token) -> 401 Unauthorized
 GET /api/clusters (com Bearer) -> 200 OK
 Seed: usuario fiap@teste.com criado no startup
 ```
+
+### Frontend integrado
+
+Com a stack Docker ativa, o app em `http://localhost:8081` autentica via JWT, executa ingestao/pipeline no painel do analista, exibe graficos de clusters/detritos e lista alertas — consumindo os mesmos endpoints documentados acima.
 
 ## Estrutura de pastas
 
